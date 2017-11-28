@@ -5,7 +5,7 @@ class Config(object):
     DEBUG = False
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    SQL_ALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
@@ -14,7 +14,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Configurations for tesing with a different test database."""
     TESTING = True
-    SQL_ALCHEMY_DATABASE_URI = 'postgresql://localhost/tukule_test'
+    SQL_ALCHEMY_DATABASE_URI = 'postgresql://postgres:5454Support54@localhost:5432/tukule_test'
     DEBUG = True
 
 class StagingConfig(Config):
@@ -30,5 +30,5 @@ app_config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
     'staging': StagingConfig,
-    'production': ProductionConfig
+    'production': ProductionConfig,
 }
