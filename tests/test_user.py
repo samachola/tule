@@ -7,7 +7,7 @@ class UserTestCase(unittest.TestCase):
     """This class represents the users test case."""
     def setUp(self):
         """Define test variables and initialize the app."""
-        self.app = create_app(config_name="testing")
+        self.app = create_app(config_name='testing')
         self.client = self.app.test_client()
         self.user = {'email': 'sam.achola@live.com', 'name': 'Sam Achola', 'role': 'customer', 'password': 'Ongorotiaf'}
 

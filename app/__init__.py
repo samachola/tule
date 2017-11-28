@@ -32,7 +32,7 @@ def create_app(config_name):
 
             try:
                 data = jwt.decode(token, os.getenv('SECRET'))
-                current_user = User.query.filter_by(email=data['email']).first()
+                current_user = Users.query.filter_by(email=data['email']).first()
             except:
                 return jsonify({'message': 'Invalid token', 'status': False})
             return f(current_user, *args, **kwargs)
@@ -44,12 +44,22 @@ def create_app(config_name):
 
     @app.route('/auth/register', methods=['POST'])
     def register():
-        email = str(request.data.get('email', ''))
-        name = str(request.data.get('name', ''))
-        password = str(request.data.get('password', ''))
+        data = request.data.get('email')
+        print(data)
 
-        if email and name and password:
-            
+        email = request.data.get('email')
+        name = request.data.get('name')
+        password = request.data.get('password')
+
+
+        if email.isspace() or name.isspace() or password.isspace():
+            response = jsonify({
+                'message': 'all fields are required',
+                'status': False
+            })
+            response.status_code = 401
+            return response
+        else:            
             hashed_password = generate_password_hash(password, method='sha256')
             new_user = Users(email=email, name=name, role='customer', password=hashed_password)
             new_user.save()
@@ -61,21 +71,13 @@ def create_app(config_name):
                 'role': new_user.role
             })
             response.status_code = 201
-
             return response
-        else:
-            response = jsonify({
-                'message': 'all fields are required',
-                'status': False
-            })
-
-            response.status_code = 401
-            return response
+        
 
     @app.route('/auth/login', methods=['POST'])
     def login():
-        email = str(request.data.get('email', ''))
-        password = str(request.data.get('password', ''))
+        email = str(request.data.get('email'))
+        password = str(request.data.get('password'))
 
         user = Users.query.filter_by(email=email).first()
         
@@ -108,7 +110,7 @@ def create_app(config_name):
 
     @app.route('/users', methods=['GET'])
     def users():
-        users = Users.get_all()
+        users = Users.query.all()
         results = []
 
         for user in users:
@@ -152,14 +154,14 @@ def create_app(config_name):
 
         if not user:
             abort(404)
-        user.name = str(request.data.get('name', ''))
-        user.email = str(request.data.get('email', ''))
-        user.role = str(request.data.get('role', ''))
+        user.name = str(request.data.get('name'))
+        user.email = str(request.data.get('email'))
+        user.role = str(request.data.get('role'))
 
         user.save()
         response = jsonify({
             'id': user.id,
-            'name': str(request.data.get('name', '')),
+            'name': str(request.data.get('name')),
             'msg': 'Update successful'
         })
         response.status_code = 200
