@@ -1,7 +1,11 @@
 from flask import request, jsonify, abort
 from flask_api import FlaskAPI
 from flask_sqlalchemy import SQLAlchemy
-
+import jwt
+import datetime
+import os
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 # local import
 from instance.config import app_config
 
@@ -17,6 +21,26 @@ def create_app(config_name):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(app)
 
+    def token_required(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            if 'x-access-token' in request.headers:
+                token = request.headers['x-access-token']
+
+            if not token:
+                return jsonify({'message': 'Access Token not available', 'status': False})
+
+            try:
+                data = jwt.decode(token, os.getenv('SECRET'))
+                current_user = User.query.filter_by(email=data['email']).first()
+            except:
+                return jsonify({'message': 'Invalid token', 'status': False})
+            return f(current_user, *args, **kwargs)
+        return decorated
+                    
+            
+        
+
 
     @app.route('/auth/register', methods=['POST'])
     def register():
@@ -25,7 +49,9 @@ def create_app(config_name):
         password = str(request.data.get('password', ''))
 
         if email and name and password:
-            new_user = Users(email=email, name=name, role='customer', password='password')
+            
+            hashed_password = generate_password_hash(password, method='sha256')
+            new_user = Users(email=email, name=name, role='customer', password=hashed_password)
             new_user.save()
 
             response = jsonify({
@@ -39,11 +65,47 @@ def create_app(config_name):
             return response
         else:
             response = jsonify({
-                'message': 'all fields are required'
+                'message': 'all fields are required',
+                'status': False
             })
 
             response.status_code = 401
             return response
+
+    @app.route('/auth/login', methods=['POST'])
+    def login():
+        email = str(request.data.get('email', ''))
+        password = str(request.data.get('password', ''))
+
+        user = Users.query.filter_by(email=email).first()
+        
+        if user:
+            if check_password_hash(user.password, password):
+                token = jwt.encode({'email': user.email, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=90)}, os.getenv('SECRET'))
+                response = jsonify({
+                    'message': 'successfully logged in',
+                    'status': True,
+                    'token': token.decode('UTF-8')
+                })
+                response.status_code = 200
+                return response
+            else:
+                response = jsonify({
+                    'message': 'password is incorrect',
+                    'status': False
+                })
+
+                response.status_code = 401
+                return response
+        else:
+            response = jsonify({
+                'message': 'user not found',
+                'status': False
+            })
+            response.status_code = 401
+            return response
+    
+
     @app.route('/users', methods=['GET'])
     def users():
         users = Users.get_all()
@@ -89,7 +151,7 @@ def create_app(config_name):
         user = Users.query.filter_by(id=id).first()
 
         if not user:
-            abor(404)
+            abort(404)
         user.name = str(request.data.get('name', ''))
         user.email = str(request.data.get('email', ''))
         user.role = str(request.data.get('role', ''))
