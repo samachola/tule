@@ -39,9 +39,14 @@ class UserTestCase(unittest.TestCase):
        self.assertEqual(result.status_code, 200)
        self.assertIn('Sam Achola', str(result.data))
 
-
-    
-
+    def test_edit_user(self):
+        """Test API can edit user."""
+        rv = self.client.post('/auth/register', data=self.user)
+        self.assertEqual(rv.status_code, 201)
+        rv = self.client.put('users/1', data={'name': 'Edited User', 'email': 'sam.achola@live.com', 'role': 'partner'})
+        self.assertEqual(rv.status_code, 200)
+        results = self.client.get('/users/1')
+        self.assertIn('Edited User', str(results.data))
 
     def tearDown(self):
         """Tear down all initialized variables."""

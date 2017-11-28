@@ -84,5 +84,26 @@ def create_app(config_name):
         response.status_code = 200
         return response
 
+    @app.route('/users/<int:id>', methods=['PUT'])
+    def edit_user(id):
+        user = Users.query.filter_by(id=id).first()
+
+        if not user:
+            abor(404)
+        user.name = str(request.data.get('name', ''))
+        user.email = str(request.data.get('email', ''))
+        user.role = str(request.data.get('role', ''))
+
+        user.save()
+        response = jsonify({
+            'id': user.id,
+            'name': str(request.data.get('name', '')),
+            'msg': 'Update successful'
+        })
+        response.status_code = 200
+
+        return response
+
+
 
     return app
