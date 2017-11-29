@@ -74,6 +74,8 @@ class Restaurant(db.Model):
     restaurant_mobile = db.Column(db.String(80))
     restaurant_about = db.Column(db.String)
     restaurant_delivery = db.Column(db.String(80))
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
     
     def __init__(self, restaurant_name, restaurant_email, restaurant_county, restaurant_location, restaurant_minorder, restaurant_phone, restaurant_mobile, restaurant_about, restaurant_delivery):
         """Initialize the restaurant model."""
