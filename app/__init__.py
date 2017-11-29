@@ -14,7 +14,7 @@ from instance.config import app_config
 db = SQLAlchemy()
 
 def create_app(config_name):
-    from app.models import Users, Location
+    from app.models import Users, Location, Restaurant
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
@@ -184,6 +184,59 @@ def create_app(config_name):
         response.status_code = 201
         return response
 
+    @app.route('/restaurant', methods=['POST'])
+    @token_required
+    def restaurant(current_user):
+        if current_user.role != 'admin':
+            reponse = jsonify({
+                'message': 'Unauthorized command',
+                'status': False
+            })
+            respone.status_code = 401
 
+            return response
+
+        restaurant_name = str(request.data.get('restaurant_name'))
+        restaurant_email = str(request.data.get('restaurant_email'))
+        restaurant_county = str(request.data.get('restaurant_county'))
+        restaurant_location = str(request.data.get('restaurant_location'))
+        restaurant_minorder = str(request.data.get('restaurant_minorder'))
+        restaurant_phone = str(request.data.get('restaurant_phone'))
+        restaurant_mobile = str(request.data.get('restaurant_mobile'))
+        restaurant_about = str(request.data.get('restaurant_about'))
+        restaurant_delivery = str(request.data.get('restaurant_delivery'))
+
+        if restaurant_name.isspace() or restaurant_email.isspace() or restaurant_county.isspace() or restaurant_location.isspace():
+            reponse = jsonify({
+                'message': 'All fields are required',
+                'status': False
+            })
+
+            return response
+        elif restaurant_minorder.isspace() or restaurant_phone.isspace() or restaurant_mobile.isspace():
+            reponse = jsonify({
+                'message': 'All fields are required',
+                'status': False
+            })
+
+            return response
+        elif restaurant_about.isspace() or restaurant_delivery.isspace():
+            reponse = jsonify({
+                'message': 'All fields are required',
+                'status': False
+            })
+
+            return response
+        else: 
+            new_restaurant = Restaurant(restaurant_name, restaurant_email, restaurant_county, restaurant_location, restaurant_minorder, restaurant_phone, restaurant_mobile, restaurant_about, restaurant_delivery)
+            new_restaurant.save()
+
+            response = jsonify({
+                'Message': 'Successfully added new Restaurant',
+                'Status': True
+            })
+
+            response.status_code = 201
+            return response
 
     return app
