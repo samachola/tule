@@ -14,7 +14,7 @@ from instance.config import app_config
 db = SQLAlchemy()
 
 def create_app(config_name):
-    from app.models import Users
+    from app.models import Users, Location
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
@@ -166,6 +166,22 @@ def create_app(config_name):
         })
         response.status_code = 200
 
+        return response
+
+    @app.route('/location', methods=['POST'])
+    @token_required
+    def location(current_user):
+        county = str(request.data.get('county'))
+        location = str(request.data.get('location'))
+
+        user_location = Location(current_user.id, county, location)
+        user_location.save()
+
+        response = jsonify({
+            'message': 'Successfully added user location',
+            'status': True
+        })
+        response.status_code = 201
         return response
 
 
