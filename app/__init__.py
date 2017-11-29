@@ -188,11 +188,11 @@ def create_app(config_name):
     @token_required
     def restaurant(current_user):
         if current_user.role != 'admin':
-            reponse = jsonify({
+            response = jsonify({
                 'message': 'Unauthorized command',
                 'status': False
             })
-            respone.status_code = 401
+            response.status_code = 401
 
             return response
 
@@ -207,7 +207,7 @@ def create_app(config_name):
         restaurant_delivery = str(request.data.get('restaurant_delivery'))
 
         if restaurant_name.isspace() or restaurant_email.isspace() or restaurant_county.isspace() or restaurant_location.isspace():
-            reponse = jsonify({
+            response = jsonify({
                 'message': 'All fields are required',
                 'status': False
             })
@@ -221,7 +221,7 @@ def create_app(config_name):
 
             return response
         elif restaurant_about.isspace() or restaurant_delivery.isspace():
-            reponse = jsonify({
+            response = jsonify({
                 'message': 'All fields are required',
                 'status': False
             })
