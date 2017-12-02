@@ -14,7 +14,7 @@ from instance.config import app_config
 db = SQLAlchemy()
 
 def create_app(config_name):
-    from app.models import Users, Location, Restaurant
+    from app.models import Users, Location, Restaurant, Category
     app = FlaskAPI(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
@@ -238,5 +238,55 @@ def create_app(config_name):
 
             response.status_code = 201
             return response
+
+
+    @app.route('restaurant/category', methods=['POST'])
+    @token_required
+    def add_category(current_user):
+        if current_user.role != 'admin':
+            response = jsonify({
+                'message': 'You don\'t have the right permission',
+                'status': False
+            })
+            response.status_code = 401
+
+            return response
+
+        new_category = Category(request.data.get('restaurant_id'), request.data.get('category_name'))
+        new_category.save()
+
+        response = jsonify({
+            'message': 'Successfully added new category',
+            'status': True
+        })
+        response.status_code = 201
+
+        return response
+    @app.route('/restaurant/category/<int:id>', methods=['GET'])
+    @token_required
+    def get_categories(current_user, id):
+        """Gets the list of categories by restaurant_id."""
+        categories = []
+
+        cats = Category.query.filter_by(restaurant_id=id).all()
+        for cat in cats:
+            category = {
+                'id': cat.id,
+                'name': cat.name,
+                'restaurant': cat.restaurant_id
+
+            }
+
+            categories.append(category)
+
+        response = jsonify({
+            'status': True,
+            'categories': categories
+        })
+
+        response.status_code = 200
+        return response
+
+    # Todo: Add PUT and DELETE Methods of the Restaurant Category
 
     return app

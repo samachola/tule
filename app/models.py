@@ -95,3 +95,24 @@ class Restaurant(db.Model):
 
     def __repr__(self):
         return "<Restaurant: {}>".format(self.restaurant_name)
+
+
+class Category(db.Model):
+    """This class represents the restaurant's menu_category table."""
+    __tablename__ = 'menu_categories'
+
+    id = db.Column(db.Integer, primary_key=True)
+    restaurant_id = db.Column(db.Integer)
+    category_name = db.Column(db.String(80))
+
+    def __init__(self, restaurant_id, category_name):
+        restaurant_id = self.restaurant_id
+        category_name = self.category_name
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return "<Category: {}>".format(self.category_name)
+        
