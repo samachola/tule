@@ -37,10 +37,6 @@ def create_app(config_name):
                 return jsonify({'message': 'Invalid token', 'status': False})
             return f(current_user, *args, **kwargs)
         return decorated
-                    
-            
-        
-
 
     @app.route('/auth/register', methods=['POST'])
     def register():
@@ -240,7 +236,7 @@ def create_app(config_name):
             return response
 
 
-    @app.route('restaurant/category', methods=['POST'])
+    @app.route('/restaurant/category', methods=['POST'])
     @token_required
     def add_category(current_user):
         if current_user.role != 'admin':
@@ -262,7 +258,8 @@ def create_app(config_name):
         response.status_code = 201
 
         return response
-    @app.route('/restaurant/category/<int:id>', methods=['GET'])
+
+    @app.route('/restaurant/categories/<int:id>', methods=['GET'])
     @token_required
     def get_categories(current_user, id):
         """Gets the list of categories by restaurant_id."""
@@ -274,9 +271,7 @@ def create_app(config_name):
                 'id': cat.id,
                 'name': cat.name,
                 'restaurant': cat.restaurant_id
-
             }
-
             categories.append(category)
 
         response = jsonify({
@@ -287,6 +282,27 @@ def create_app(config_name):
         response.status_code = 200
         return response
 
-    # Todo: Add PUT and DELETE Methods of the Restaurant Category
+    @app.route('/restaurant/category/<int:id>', methods=['PUT'])
+    @token_required
+    def edit_category(current_user, id):
+        """Edits the restaurants menu category."""
+        restaurant_category = Category.query.filter_by(id=id).first()
+        if not restaurant_category:
+            return jsonify({'message': 'Category not found', 'status': False})
+        restaurant_category.name = str(request.data.get('category_name'))
+        db.session.commit()
+
+    @app.route('/restaurant/category/<int:id>', methods=['DELETE'])
+    @token_required
+    def delete_category(current_user, id):
+        """Deletes the category by id."""
+        restaurant_category = Category.query.filter_by(id=id).first()
+        if not restaurant_category:
+            return jsonify({'message': 'category not found', 'status': False})
+        db.session.delete(restaurant_category)
+        db.session.commit()
+
+        return jsonify({'message': 'Category has been successfully deleted', 'status': True})
+        
 
     return app
