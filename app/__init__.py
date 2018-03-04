@@ -1,17 +1,19 @@
-from flask import request, jsonify, abort
-from flask_api import FlaskAPI
-from flask_sqlalchemy import SQLAlchemy
 import jwt
 import datetime
 import os
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from flask import request, jsonify, abort, 
+from flask_api import FlaskAPI
+from flask_sqlalchemy import SQLAlchemy
 # local import
 from instance.config import app_config
 
 # initialize SQLAlchemy
 
 db = SQLAlchemy()
+
+
 
 def create_app(config_name):
     from app.models import Users, Location, Restaurant, Category
