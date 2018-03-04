@@ -14,7 +14,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Configurations for tesing with a different test database."""
     TESTING = True
-    SQL_ALCHEMY_DATABASE_URI = 'postgresql://postgres:5454Support54@localhost:5432/tukule_test'
+    SQL_ALCHEMY_DATABASE_URI = 'postgresql://localhost:5432/tukule_test'
     DEBUG = True
 
 class StagingConfig(Config):
