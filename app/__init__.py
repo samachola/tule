@@ -21,6 +21,8 @@ db = SQLAlchemy(app)
 CORS(app)
 
 from app.auth.view import auth
+from app.restaurant.view import partner
 
 # Register Blueprints
 app.register_blueprint(auth, url_prefix='/api-v0/auth')
+app.register_blueprint(partner, url_prefix='/api-v0/restaurant')
